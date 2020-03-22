@@ -18,6 +18,7 @@
 The goal of this paper is to provide a rigorous, simple derivation of the Black Scholes formula.  The only pre-requisite mathematical and economic theory is basic (continuous) stochastic differential equations and the economic notion of efficiency.  Enumerating these pre-requisites:
 \begin{enumerate}
 	\item I use stochastic calculus and regard the existence of solutions to integrals such as \(dS_t=\alpha(S, t)dt+\sigma(S, t)dW_t\) to be established and rigorous (as it is).
+	\item I use the Martingale Representation Theorem without proof.
 	\item I use the economic concept that if two payoffs are equivalent, then economic agents will be indifferent between them and the existence of a market will force the two payoffs to have the same time \(0\) price.
 \end{enumerate}
 
@@ -32,7 +33,7 @@ Note I do not use Feynman-Kac, Girsonov, or the First Fundamental Theorem of Ass
 The proof requires two parts.  Proof that \( d \mathbb{ \tilde{P} } \) is a probability measure:
 \\
 \\
-A probability measure requires that \( \int_\Omega d \mathbb{ \tilde{P} }=1\).  Since \( \mathbb{E}[Z_T]=1\), this is self-evident.  Since \(d\mathbb{P}\) is a probability measure (by assumption), then \(d\mathbb{\tilde{P}}\) is a probability measure if it is an equivalent measure to \(d\mathbb{P}\).  Note that equivalence is a stronger statement, but by proving it I prove the weaker statement that \(d \mathbb{\tilde{P}}\) is a probability measure.  Equivalence is also immediately evident when noting that \(Z_t\) is almost-surely positive.  
+A probability measure requires that \( \int_\Omega d \mathbb{ \tilde{P} }=1\).  Since \( \mathbb{E}[Z_T]=1\), this is self-evident.  Since \(d\mathbb{P}\) is a probability measure (by assumption), then \(d\mathbb{\tilde{P}}\) is a probability measure if it is an equivalent measure to \(d\mathbb{P}\).  Note that equivalence is a stronger statement, but by proving it I prove the weaker statement that \(d \mathbb{\tilde{P}}\) is a probability measure.  Equivalence is immediately evident when noting that \(Z_t\) is almost-surely positive.  
 \\
 \\
 It remains to prove that \(d\tilde{W}_t=dW_t+\theta_t dt\) is a standard Brownian Motion under \(\mathbb{\tilde{P}}\).
@@ -46,28 +47,121 @@ Completing the square,
 Recognizing this as the characteristic function of a standard Brownian Motion, the proof is complete.
 \end{proof}
 
-This proof implies that for any measurable function \(g\), \(\mathbb{E}[Z_T g(W_T)]\) can be written as \(\int_\Omega g(\omega) d\mathbb{\tilde{P}}(\omega)=\mathbb{\tilde{E}}[g(W_T)]\). 
-
 \section{Derivation of Black Scholes}
 
-Let there be a market in which two assets exist.  Canonically these two assets are a stock and a bond.  Let these markets be infinitely liquid so that there are buyers and sellers at any price and transaction costs are zero.  The goal is to construct a portfolio from these two assets that replicates the payoff of an option.  Mathematically, an option is a function \(h\) of one or more assets in the market.  For a European call option, \(h(x)=\mathbb{I}_{x>K}(x-K)\) where \(\mathbb{I}\) is the indicator function and \(K\) is the ``strike'' price.  
+Let there be a market in which two assets exist.  Canonically these two assets are a stock and a bond.  Let these markets be infinitely liquid so that there are buyers and sellers at any price and transaction costs are zero.  Let this market also allow short selling. The goal is to construct a portfolio from these two assets that replicates the payoff of an option.  Mathematically, an option is a function \(h\) of one or more assets in the market.  For a European call option, \(h(x)=\mathbb{I}_{x>K}(x-K)\) where \(\mathbb{I}\) is the indicator function and \(K\) is the ``strike'' price.  
 \\
 \\
 I now assume that the assets have the following dynamics:
 \begin{equation}\label{eq1}
 \begin{aligned}
-dS_t = & \alpha(S_t, t)dt+\sigma(S_t, t)dW_t\\
+dS_t = & \alpha(S_t, t) S_t dt+\sigma(S_t, t) S_t dW_t\\
 dM_t = & r_t M_t dt
 \end{aligned}
 \end{equation}	
 
 Besides the ``usual'' constraints on \(\alpha\) and \(\sigma\), I also require that these functions are chosen such that \(S_t\) is positive almost surely.  Additionally, \(r_t\) may be stochastic though it is measurable with respect to the Brownian Motion \(W_t\).
 
-\begin{theorem}
+\begin{theorem}\label{RND}
 	Let \ref{eq1} hold.  Then a contingent claim on \(S_t\) has the following price:
-	\[v(S_t, t)=M_t\mathbb{E^M}\left[\frac{h(S_T)}{M_T} | \mathcal{F}_t\right]=S_t\mathbb{E^S}\left[\frac{M_T h(S_T)}{S_T}| \mathcal{F}_t \right]\]
-	
+	\[v(S_t, t)=M_t\mathbb{E^M}\left[\frac{h(S_T)}{M_T} | \mathcal{F}_t\right]=S_t\mathbb{E^S}\left[\frac{h(S_T)}{S_T}| \mathcal{F}_t \right]\]
+	Where under the measure \(\mathbb{M}\), \(dW^\mathbb{M}_t=dW_t+\frac{\alpha(S_t, t)-r_t}{\sigma(S_t, t)}dt\) and under the measure \(\mathbb{S}\), \(dW^\mathbb{S}_t=dW_t+\frac{\alpha(S_t, t)-r_t -\sigma^2(S_t, t)}{\sigma(S_t, t)}dt\)
 \end{theorem}
+\begin{proof}
+	Let \(X_t=\Delta_t S_t +\Gamma_t M_t\) be the portfolio of the stock and bond.  By the self-financing condition (no external funds are injected or disbursed), the differential of \(X_t\) is \(dX_t=\Delta_t dS_t + \Gamma_t d M_t\).  Combining these two equations allows me to rewrite \(X_t\) as a function of \(S_t\) or a function of \(M_t\).  If I can find a \(\Delta\) and a \(\Gamma\) such \(X_t\) has a terminal value \(X_T=h(S_T)\), then \(X_T\) replicates \(h(S_T)\) and by no arbitrage the value of the option  at any time \(t<T\) must be \(X_t\).  I start with writing \(X_t\) as a function of \(S_t\).
+	\\
+	\\
+	\[dX_t=\Delta_t dS_t+r_t \Gamma M_t dt = \Delta_t dS_t+r_t \left(X_t-\Delta_t S_t\right) dt\]
+	\[=\Delta_t S_t \left(\alpha(S_t, t)dt+\sigma(S_t, t)dW_t\right)+r_t \left(X_t-\Delta_t S_t\right) dt\]
+	\[=\Delta_t S_t \left(\alpha(S_t, t)-r_t\right) dt+\Delta_t S_t \sigma(S_t, t)dW_t+r_t X_t dt\]
+	Since I want to write this as only a function \(S_t\), I add an integrating factor to the differential:
+	\[d\left(\frac{X_t}{M_t}\right)=\frac{dX_t}{M_t}-\frac{X_t}{M^2_t} dM_t = \frac{\Delta S_t}{M_t}\left(\alpha(S_t, t)dt-r_t\ dt+\sigma(S_t, t)dW_t \right) \]
+	\[=\frac{\Delta S_t}{M_t}\sigma(S_t, t)\left( dW_t +\frac{\alpha(S_t, t)dt-r_t\ dt}{\sigma(S_t, t)} dt \right)\]
+	
+	By Girsonov's Theorem, 
+	\[=\frac{\Delta S_t}{M_t}\sigma(S_t, t) dW^\mathbb{M}_t \]
+	
+	Integrating,
+	
+	\[\frac{X_T}{M_T}=\frac{X_t}{M_t}+\int_t ^ T \frac{\Delta S_s}{M_s}\sigma(S_s, s) dW^\mathbb{M}_s\]
+	
+	Taking expectation of each side:
+	
+	\[\mathbb{E^M}\left[\frac{X_T}{M_T}\right] = \frac{X_t}{M_t}\]
+	
+	Finally, 
+	
+	\[X_t=M_t \mathbb{E^M}\left[\frac{ X_T}{M_T}\right]\]
+	
+	Since I have constructed this process to have \(X_T=h(S_T)\), the value of \(v(S_t, t)\) is 
+	\[v(S_t, t)=X_t=M_t \mathbb{E^M}\left[\frac{ h(S_T)}{M_T}\right]\]
+	
+	The existence of a \(\Delta\) and \(\Gamma\) is guaranteed by the Martingale Representation Theorem.
+	\\
+	\\
+	
+	I next start writing \(X_t\) as a function of \(M_t\).
+	
+	
+	\[dX_t=\Delta_t dS_t+\Gamma_t dM_t \]
+	
+	\[dX_t= \frac{X_t-\Gamma_t M_t}{S_t} dS_t +r_t \Gamma_t M_t dt \]
+	
+	
+	Since I want to write this as a function of \(M_t\), I add an integrating factor to the differential:
+	
+	\[ d\left(\frac{X_t}{S_t}\right)=  \frac{dX_t}{S_t} -\frac{X_t}{S^2_t} dS_t + \frac{X_t}{S^3_t} dS_t dS_t -\frac{dX_t dS_t}{S^2_t} \]
+	
+	\[= \frac{\frac{X_t-\Gamma_t M_t}{S_t} dS_t +\Gamma_t r_t M_t dt}{S_t} - \frac{X_t}{S^2_t} dS_t + \frac{X_t}{S_t} \sigma^2(S_t, t) dt -\frac{X_t-\Gamma_t M_t}{S_t} \sigma^2(S_t, t) dt  \]
+	
+	\[= \frac{X_t-\Gamma_t M_t}{S^2_t} dS_t +\frac{\Gamma_t r_t M_t}{S_t} dt- \frac{X_t}{S^2_t} dS_t + \frac{X_t}{S_t} \sigma^2(S_t, t) dt -\frac{X_t-\Gamma_t M_t}{S_t} \sigma^2(S_t, t) dt  \]
+	
+	\[= \frac{\Gamma_t M_t}{S_t} \left( r_t-\alpha(S_t, t)+\sigma^2(S_t, t)\right) dt - \frac{\Gamma_t M_t}{S_t} \sigma(S_t, t) dW_t \]
+	
+	\[ = \frac{\Gamma_t M_t}{S_t} \sigma(S_t, t) \left(  \frac{r_t-\alpha(S_t, t) +\sigma^2(S_t, t)}{\sigma(S_t, t)} - dW_t \right) dt \] 
+	
+	By Girsonov's Theorem,
+	
+	\[=-\frac{\Gamma M_t}{S_t}\sigma(S_t, t) dW^\mathbb{S}_t \]
+	
+	
+	Integrating,
+	
+	\[\frac{X_T}{S_T}=\frac{X_t}{S_t}-\int_t ^ T \frac{\Gamma M_s}{S_s}\sigma(S_s, s) dW^\mathbb{S}_s\]
+	
+	A similar argument as above yields
+	\[X_t=S_t \mathbb{E^S}\left[\frac{h(S_T)}{S_T} \right] \]
+	
+\end{proof}
+
+\begin{theorem}\label{BS}
+	When \(r_t\), \(\alpha(S_t, t)\), and \(\sigma(S_t, t)\) are positive constants, the price of a call option (\(h(x)=\mathbb{I}_{x>K}(x-K)\)) is 
+	\[S_0 \mathcal{N}(d_1)-K e^{-rT} \mathcal{N}(d_2)\]
+	Where \(d_1=\frac{\log\left(\frac{S_0}{K}\right)+\left(r+\frac{\sigma^2}{2}\right) T}{\sigma \sqrt{T}} \) and \(d_2=d_1-\sigma \sqrt{T}\)
+\end{theorem}
+
+\begin{proof}
+	By \ref{RND}, the value of a call option is 
+	\[X_0=S_0 \mathbb{E^S}\left[\frac{ (S_T-K) \mathbb{I}_{S_T>K} }{S_T} \right] \]
+	\[= S_0    \mathbb{E^S}\left[ \left(1-\frac{K}{S_T} \right) \mathbb{I}_{S_T>K} \right] \]
+	
+	Under the measure \(\mathbb{P^S}\), 
+	
+	\[dS_t=S_t \left(r+\sigma^2\right)dt +\sigma S_t dW^\mathbb{S}_t \]
+	
+	Which has solution
+	
+	\[ S_T=S_0 e^{ \left(r+ \frac{1}{2} \sigma^2 \right)T +\sigma W^\mathbb{S}_T }  \]
+	
+	Substituting,
+	
+	\[X_0 = S_0  \mathbb{E^S}\left[ \left(1-\frac{K e^{-rT -\frac{1}{2} \sigma^2 T - \sigma W^\mathbb{S}_T}}{S_0} \right) \mathbb{I}_{S_T>K} \right] \]
+	
+	\[ = S_0 \int_{-d_2}^\infty \left( 1-\frac{K e^{-rT -\frac{1}{2} \sigma^2 T - \sigma \sqrt{T} y } }{S_0} \right) \frac{1}{\sqrt{2\pi}} e^{-y^2 /2 } dy \]
+	
+	A tedious but straightforward computation yields \ref{BS}.
+	
+\end{proof}
 
 
 \end{document}
